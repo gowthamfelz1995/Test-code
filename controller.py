@@ -317,6 +317,7 @@ def index():
 @app.route('/handle_form', methods =['POST'])
 def handle_form():
     content = request.files['file'].read()
+    print('content-->',content)
     record_id = str(request.form.get('recordId'))
     file_name = request.files['file'].filename
     file_type = request.headers['fileType']
@@ -732,6 +733,7 @@ def create_docx():
             "parentId": record_id 
             }
     return json.dumps(doc_data)
+
 
 
 #Create folder for document :
@@ -1400,7 +1402,7 @@ def attach_field_values(obj_to_bind,data_dict) :
      return field_name
 
 if __name__ == "__main__":
-    app.run(ssl_context="adhoc")
+    app.run()
     
 
 
