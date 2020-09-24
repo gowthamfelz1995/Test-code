@@ -37,6 +37,8 @@ import shutil
 from flask_cors import CORS
 import jwt
 from oauthlib.common import urlencode
+from pymongo import MongoClient
+client = MongoClient()
 
 
 
@@ -73,7 +75,6 @@ def generate_document():
     field_list = []
     child_obj_metadata = []
     for para in doc.paragraphs:
-        print('para-->',para)
         full_text.append(para.text)
     document_data = '\n'.join(full_text)
     field_list = re.findall("\\$\\{(.*?)\\}", document_data)
@@ -435,7 +436,8 @@ def generate_document():
             "folderId": folder_id_dyn,
             "fileName" : file_name
         }
-        return json.dumps(data)
+        formed_query = generate_mongodb_query(obj_wrapper)
+        return json.dumps(formed_query)
     else :
         obj_wrapper = json.dumps(obj_wrapper, default=lambda o: o.__dict__)
         print("ObjMetaDataInfo-->{}".format(obj_wrapper))
@@ -445,7 +447,8 @@ def generate_document():
             "folderId": folder_id_dyn,
             "fileName" : file_name
         }
-        return json.dumps(data)
+        formed_query = generate_mongodb_query(obj_wrapper)
+        return json.dumps(formed_query)
 
 def get_all_table_patterns(whole_text):
     table_patterns = re.findall("\\$tbl\\{START:.*?\\}(.*?)\\$tbl\\{END:.*?\\}",whole_text)
@@ -461,11 +464,117 @@ def get_all_table_patterns(whole_text):
         return table_pattern_list
 
 #generate dynamic query in mongodb
-def generate_mongodb_query(self, jsonData):
-    mongodbquery = ''
+def generate_mongodb_query(jsonData):
+    mongodbquery = []
+    final_projection_list = []
+    parent_object_list = []
+    json_dic = json.loads(jsonData)
+    objMatch = {
+            '$match':{
+                '_id' : json_dic['objName']
+            }
+        }
+    mongodbquery.append(objMatch)  
+    final_projection_list.append('_id') 
+    for fields_in_mainobject in json_dic['fieldWrapperList']:
+        field_api_name = ''
+        main_obj_api = fields_in_mainobject['fieldName'].split('(')
+        field_api_name = main_obj_api[0]
+        final_projection_list.append(field_api_name)
+        pass
+    if len(json_dic['parentObjWrapperList']) > 0 :
+        for parent_obj_list in json_dic['parentObjWrapperList']:
+            #  get field name and api name from the parent object
+            parent_obj_api = parent_obj_list['objName'].split('(')
+            obj_name = parent_obj_api[1].split(')')[0]
+            field_name = parent_obj_api[0]
+            field_query_list = []
+            # get all fields in the variable
+            for fields in parent_obj_list['fieldWrapperList']:
+                field_query_list.append(fields['fieldName'])
+            field_query = Convert(field_query_list)
+            parent_object_list.append(field_name)
+            parent_obj = {
+                "$lookup":{
+                    "from": obj_name,
+                    "let":{
+                            "id": '$'+field_name
+                         },
+                    "pipeline":[
+                        {
+                        "$match":{
+                            "$expr":{
+                                "$eq":[
+                                    "$_id",
+                                    "$$id"
+                                ]
+                            }
+                        }
+                      },
+                                {
+                        "$project": field_query
+                        }
+                    ],
+                        "as":field_name
+                    }
+                }
+            mongodbquery.append(parent_obj)
+    if len(json_dic['childObjWrapperList']) > 0 :
+        for child_obj_value in json_dic['childObjWrapperList']:
+            field_query_list = []
+            # get all fields in the variable
+            for fields in parent_obj_list['fieldWrapperList']:
+                field_query_list.append(fields['fieldName'])
+            field_query = Convert(field_query_list)
+            parent_obj = {
+                "$lookup":{
+                    "from": child_obj_value['objName'],
+                    "let":{
+                            "id": "$_id"
+                         },
+                    "pipeline":[
+                        {
+                        "$match":{
+                            "$expr":{
+                                "$eq":[
+                                    json_dic['objName'],
+                                    "$$id"
+                                ]
+                            }
+                        }
+                      },
+                                {
+                        "$project": field_query
+                        }
+                    ],
+                        "as":child_obj_value['objName']
+                    }
+                }
+            mongodbquery.append(parent_obj) 
+            final_projection_list.append(child_obj_value['objName'])
+            
     
-    pass
+    all_object_projection = Convert(final_projection_list)
+    
+    for key,value in all_object_projection.items():
+        if key in parent_object_list:
+           all_object_projection[key] = {
+                                        "$arrayElemAt":[
+                                        "$$"+key,
+                                        0
+                                        ]
+                                        }
+          
+    final_project = {
+        "$project" : all_object_projection
+    }
+    mongodbquery.append(final_project)
+    print('mongodbquery-->',mongodbquery)
+    return mongodbquery
 
+def Convert(lst): 
+    res_dct = {lst[i]: 1 for i in range(0, len(lst), 1)} 
+    return res_dct
 
 if __name__ == "__main__":
     app.run()
