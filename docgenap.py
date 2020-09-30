@@ -39,6 +39,28 @@ import jwt
 from oauthlib.common import urlencode
 import pymongo
 from bson.objectid import ObjectId
+from boxsdk import JWTAuth
+
+auth = JWTAuth(
+    client_id='fj5klf35gaydgnx2hewpfdg4uqz85ri7',
+    client_secret='mM2d0ZScYgg6dE22jShBgK6y5xL6xFID',
+    enterprise_id='635964596',
+    jwt_key_id='061jkz4x',
+    rsa_private_key_file_sys_path=None,
+    rsa_private_key_data = '-----BEGIN ENCRYPTED PRIVATE KEY-----\nMIIFDjBABgkqhkiG9w0BBQ0wMzAbBgkqhkiG9w0BBQwwDgQICUFlpOqJ2DkCAggA\nMBQGCCqGSIb3DQMHBAhk2ZclZTqcNASCBMhSLnADIn+MhR1PtS0YWLej0bUrIxjE\n7uzrtYwXN9b8G7Y7PUhroEetlRIS5Uf4qEDsYFJeZwlW/wd9Xzzjdhg+bUMmVLC5\n57tcPnS9Sv0Q3gDcGiJrhjm9k7u17/GgHhCOeUeakZX8U/RJfasijw5X8ue8+esY\ng+99BB83H+9anSjTYqic2dU7PtwDdx9AYeru6g1psBjZurzT0eE1SWdTOw5QGhG4\n78+gBsuzuU4D2SefS1wMFiuY45JvxUq6+zAGtzRi8MYXYruRsi3vQRkctTqcJZil\n6g7yxs/oY0xaSNocMY7y8kuHVirdYzj3KZX/+p8EvVB+1pzVJ50dFtJntzdpcu03\nfCfLYz2Vod6TXnGs2Dr6Zzq9NSb5otumvn6FrD5QeAoVKkEcakPbGOLACBKCJe7B\nfoDB2FJXC2LqZwDsf0X7kLcJh7xaf6l2HOOp73wsZUfpifGmmswmL3dfEbZ3uLeR\nIBIdSlNyWuwrOuNc+5fl0V1zBdys3RGo4pavwq7QDFVSg3FgwtAqfOFICUlO48EL\nuF9Z3xp8pz+rlfYiF4iMpbIqt1/OD6GOFH2PiVIUaf4xB7Arbbbv93JKnTzwj8j1\nbKowjITWVc4RmPI0XbCVvukAYm4hY1ohlTaFVs5+3Dg6BQTqEtkfxknCphtPUoGD\nKV+c0YxI4jz9bYLPAWsMvwlvfYg10kUleyzKZAGt+NvBeplbi73Je7as1ZcvNcJX\nJ1jBLatH24RB7XU0N2r0KjIKMaE7pMDghTjtoJ1DczIi2t+J5dymwqAyoba0FktF\nA+T/AsAfjs95ashgekL0g0odKeCQL6YOnb41AKFZ9m6aOOONF0q8S4oLKYdqoL5U\nWq/2DnMyiKNH7eZfbAKMAJzYDjjkVKXj2MBDg/tF4ibwoVoa6jJZT6eKi82moCr5\n3LPQpJsIlfQ5nZg6faito35KlKEUCLQkSPP9p+sAZ3qyqirvkzps1c2FRyuUnVWH\nCMPUKGHcOhdq/2ziSLS8a1X95PxpWHCOS4BRnHEiGX0m2WleqkiQsJRnXrAw8Ft8\neu6knlL1o51EE4EaQeipfHaBxRDhdLMxEJGmj4mOTOP9Q8It9Sk4FNu8Sf3bXV85\nBpK30tBHFgSo04DQdxFrcHykEuFR0CjEf26us6Thp8YkAov/ogQb6EdjaYUQpm2P\nGdWxle14L/QAhkzXGA3cVng5bbeqU3gdagCe+UN1gCWGXer6OFmA3jjy5jZCrlDM\nd1O2HonoFdlh0V+RhJtvJWi2P/KcIOu/LroBnR0wcOles/TqnSHZ3LvPp2f+SfP+\nL2KL+jgZR24vofh+owEELYSD2luoi1H7X79cCWP6qxfYBj7jKzUBUkVjKOZ5QwIo\nlpCspT9mHzDB+K83p9nwwrnYy+J55InT0tiLtWvpN3og6kPy+vdX9SN1rp0VImxO\n6n1pfzYwfbhGLgc953/avlU9vSSHjAA9wFsONB344H+QMT1pgMh6D4O42XfZzriY\ne/rgz/EH7v39RQL4Y4VJbmdv9WW3NqBfLGwGgVuGFhh0wSc3ct/PYImeiijYviiD\nOvzIFZexsc5jgms0qr7Iby2fqYAwWYhxGN/uqpfDq0p9TYti7XUNHsDa0jAQrEb/\no1A=\n-----END ENCRYPTED PRIVATE KEY-----\n',
+    rsa_private_key_passphrase='b8560c4b0187d6d5a068a637cfd034a9'
+)
+
+access_token = auth.authenticate_instance()
+
+from boxsdk import Client
+
+boxClient = Client(auth)
+
+
+
+
+
 # connect to MongoDB, change the << MONGODB URL >> to reflect your own connection string
 client = pymongo.MongoClient("mongodb://docgen:Aspi2018@cluster0-shard-00-00.6swxi.mongodb.net:27017,cluster0-shard-00-01.6swxi.mongodb.net:27017,cluster0-shard-00-02.6swxi.mongodb.net:27017/sample_analytics?ssl=true&replicaSet=atlas-lo4ypi-shard-0&authSource=admin&retryWrites=true&w=majority")
 db = client.sample_analytics
@@ -66,13 +88,15 @@ folder_id_dyn = ''
 
 @app.route('/generate_file', methods =['POST'])
 def generate_document():
-    content = request.files['file'].read()
-    record_id = '01'
+    # content = request.files['file'].read()
+    file_id = request.headers['file_id']
+    record_id = request.headers['record_id']
+    file_content = boxClient.file(file_id=file_id).content()
     # file_name = request.files['file'].filename
     file_type = 'DOCX'
     file_name = 'test'+'.docx'
-    bytes = b64decode(content)
-    source_stream = BytesIO(content)
+    bytes = b64decode(file_content)
+    source_stream = BytesIO(file_content)
     doc = Document(source_stream)
     source_stream.close()
     full_text = []
@@ -454,7 +478,7 @@ def generate_document():
         }
         json_dic = json.loads(obj_wrapper)
         collection_name = db[json_dic.get('objName')]
-        formed_query = generate_mongodb_query(json_dic)
+        formed_query = generate_mongodb_query(json_dic,record_id)
         queried_data = collection_name.aggregate(formed_query)
         record_data = list(queried_data)
         new_data = record_data[0]
@@ -477,7 +501,7 @@ def generate_document():
         }
         json_dic = json.loads(obj_wrapper)
         collection_name = db[json_dic.get('objName')]
-        formed_query = generate_mongodb_query(json_dic)
+        formed_query = generate_mongodb_query(json_dic,record_id)
         queried_data = collection_name.aggregate(formed_query)
         record_data = list(queried_data)
         print('queried_data-->',record_data[0])
@@ -504,13 +528,14 @@ def get_all_table_patterns(whole_text):
         return table_pattern_list
 
 #generate dynamic query in mongodb
-def generate_mongodb_query(json_dic):
+def generate_mongodb_query(json_dic,record_id):
     mongodbquery = []
     final_projection_list = []
     parent_object_list = []
+    print("ObjectId-->",record_id)
     objMatch = {
             '$match':{
-                '_id' : ObjectId("5ca4bbc7a2dd94ee5816238c")
+                '_id' : ObjectId(record_id)
             }
         }
    
