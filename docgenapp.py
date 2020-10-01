@@ -488,8 +488,17 @@ def generate_document():
                new_value = {'records' : new_data[obj_field]}
                new_data[obj_field] = new_value
         bind_values_doc(new_data,doc)
-        doc.save('test.docx')
-        return 'Success'
+        # doc.save('test.docx')
+        docx_stream = io.BytesIO()
+        doc.save(docx_stream)
+        docx_bytes = docx_stream.getvalue()
+        encoded = base64.b64encode(docx_bytes)
+        doc_data = {
+                "file_id":file_id ,
+                "file": str(encoded)[2:-1],
+                "record_id": record_id 
+                }
+        return json.dumps(doc_data)
     else :
         obj_wrapper = json.dumps(obj_wrapper, default=lambda o: o.__dict__)
         print("ObjMetaDataInfo-->{}".format(obj_wrapper))
@@ -511,8 +520,17 @@ def generate_document():
                new_value = {'records' : new_data[obj_field]}
                new_data[obj_field] = new_value
         bind_values_doc(new_data,doc)
-        doc.save('testdocx.docx')
-        return 'Success'
+        # doc.save('test.docx')
+        docx_stream = io.BytesIO()
+        doc.save(docx_stream)
+        docx_bytes = docx_stream.getvalue()
+        encoded = base64.b64encode(docx_bytes)
+        doc_data = {
+                "file_id":file_id ,
+                "file": str(encoded)[2:-1],
+                "record_id": record_id 
+                }
+        return json.dumps(doc_data)
 
 def get_all_table_patterns(whole_text):
     table_patterns = re.findall("\\$tbl\\{START:.*?\\}(.*?)\\$tbl\\{END:.*?\\}",whole_text)
