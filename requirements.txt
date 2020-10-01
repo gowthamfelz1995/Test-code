@@ -1,5 +1,4 @@
 appnope==0.1.0
-appscript==1.1.0
 astroid==2.3.3
 attrs==20.2.0
 backcall==0.2.0
