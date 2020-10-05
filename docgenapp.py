@@ -62,8 +62,9 @@ boxClient = Client(auth)
 
 
 # connect to MongoDB, change the << MONGODB URL >> to reflect your own connection string
-client = pymongo.MongoClient("mongodb://docgen:Aspi2018@cluster0-shard-00-00.6swxi.mongodb.net:27017,cluster0-shard-00-01.6swxi.mongodb.net:27017,cluster0-shard-00-02.6swxi.mongodb.net:27017/sample_analytics?ssl=true&replicaSet=atlas-lo4ypi-shard-0&authSource=admin&retryWrites=true&w=majority")
-db = client.sample_analytics
+client = pymongo.MongoClient("mongodb://superadmin:Superadmin_Aspi@aspigrow-01w1b.mongodb.net/appgen?retryWrites=true&w=majority")
+db = client.appgen
+
 
 
 
