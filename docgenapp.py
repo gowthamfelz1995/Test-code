@@ -504,7 +504,7 @@ def generate_document():
                 new_value = {'records': new_data[obj_field]}
                 new_data[obj_field] = new_value
         bind_values_doc(new_data, doc)
-        # doc.save('test.docx')
+        doc.save('test.docx')
         docx_stream = io.BytesIO()
         doc.save(docx_stream)
         docx_bytes = docx_stream.getvalue()
@@ -539,7 +539,7 @@ def generate_document():
                 new_value = {'records': new_data[obj_field]}
                 new_data[obj_field] = new_value
         bind_values_doc(new_data, doc)
-        # doc.save('test.docx')
+        doc.save('test.docx')
         docx_stream = io.BytesIO()
         doc.save(docx_stream)
         docx_bytes = docx_stream.getvalue()
@@ -1198,6 +1198,10 @@ def bind_values_doc(data_dict, doc):
                                                 splited_list = corrected_field.split(
                                                     '.')
                                             if len(field_pattern) == 3:
+                                                print('corrected_field-->',
+                                                      corrected_field)
+                                                print('record-->',
+                                                      record[corrected_field])
                                                 try:
                                                     formatted_type_data = record[corrected_field]
                                                 except:
@@ -1245,7 +1249,9 @@ def bind_values_doc(data_dict, doc):
                                             field_name = value if len(
                                                 format_type) > 0 else formatted_type
                                             table.cell(
-                                                row_index+1, j).text = field_name
+                                                row_index+1, j).text = formatted_type_data
+                                            print('field_name-->',
+                                                  formatted_type_data)
                                             # table.rows[row_index+1].height_rule = WD_ROW_HEIGHT.AUTO
                                             # print("table-->{}".format(table.rows[row_index+1].height_rule))
                                             table.rows[row_index+1].height = 1
@@ -1331,12 +1337,10 @@ def attach_field_values(obj_to_bind, data_dict):
     if len(function_list) > 0:
         field_name = generate_functions(function_list, data_dict)
     else:
-        print('format_type-->', obj_to_bind)
         format_type = re.findall("(#[A-Z]*)", obj_to_bind)
-        print('format_type-->', format_type)
         corrected_field = ''
         if len(format_type) > 0:
-            corrected_field = obj_to_bind.replace(format_type[0], '').rstrip()
+            corrected_field = obj_to_bind
         else:
             corrected_field = obj_to_bind
         splited_list = corrected_field.split('.')
@@ -1345,6 +1349,7 @@ def attach_field_values(obj_to_bind, data_dict):
             formatted_type_data = data_dict[splited_list[1]
                                             ] if splited_list[1] in data_dict.keys() else ''
             formatted_type = str(formatted_type_data)
+            value = ''
             if len(format_type) > 0 and format_type[0] == '#NUMBER':
                 value = ','.join(formatted_type[i:i+3]
                                  for i in range(0, len(formatted_type), 3))
@@ -1361,7 +1366,7 @@ def attach_field_values(obj_to_bind, data_dict):
                 value = value.split(' ')
                 value = value[1]+' '+value[2]+','+''+value[-1]
 
-            field_name = value if len(format_type) > 0 else formatted_type
+            field_name = formatted_type
         elif len(splited_list) == 3:
             obj_name_match = re.split('Id', splited_list[1])
             try:
@@ -1384,7 +1389,7 @@ def attach_field_values(obj_to_bind, data_dict):
                     separate_date[1]), int(datefield)).ctime()
                 value = value.split(' ')
                 value = value[1]+' '+value[2]+','+''+value[-1]
-            field_name = value if len(format_type) > 0 else formatted_type
+            field_name = formatted_type
         elif len(splited_list) == 4:
             obj_name_match = re.split('Id', splited_list[1])
             obj_field_name = re.split('Id', splited_list[2])
@@ -1409,7 +1414,7 @@ def attach_field_values(obj_to_bind, data_dict):
                     separate_date[1]), int(datefield)).ctime()
                 value = value.split(' ')
                 value = value[1]+' '+value[2]+','+''+value[-1]
-            field_name = value if len(format_type) > 0 else formatted_type
+            field_name = formatted_type
 
     return field_name
 
