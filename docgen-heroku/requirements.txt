@@ -9,7 +9,7 @@ cffi==1.14.0
 chardet==3.0.4
 Click==7.0
 comtypes==1.1.7
-cryptography==2.9
+cryptography==3.2
 decorator==4.4.2
 dnspython==2.0.0
 docx2pdf==0.1.5
